@@ -1,5 +1,6 @@
 import hlt.*;
-import java.util.*;
+
+import java.util.ArrayList;
 
 public class MyBot {
 
@@ -24,13 +25,12 @@ public class MyBot {
                 if (ship.getDockingStatus() != Ship.DockingStatus.Undocked) {
                     continue;
                 }
-              Map<Double, Entity> entities_by_distance = gameMap.nearbyEntitiesByDistance(ship);
-              for (Entity e : entities_by_distance.values()) {
-                  if (e instanceof Planet) {
-                    Planet planet = (Planet) e;
+
+                for (final Planet planet : gameMap.getAllPlanets().values()) {
                     if (planet.isOwned()) {
-                      continue;
+                        continue;
                     }
+
                     if (ship.canDock(planet)) {
                         moveList.add(new DockMove(ship, planet));
                         break;
@@ -42,8 +42,7 @@ public class MyBot {
                     }
 
                     break;
-                  }
-              }
+                }
             }
             Networking.sendMoves(moveList);
         }
