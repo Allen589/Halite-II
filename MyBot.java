@@ -24,11 +24,17 @@ public class MyBot {
                 if (ship.getDockingStatus() != Ship.DockingStatus.Undocked) {
                     continue;
                 }
+                /* Finds undocked planets nearest to my ships */
               Map<Double, Entity> entities_by_distance = gameMap.nearbyEntitiesByDistance(ship);
-              for (Entity e : entities_by_distance.values()) {
+              Map<Double, Entity> sorted_entities_by_distance = new TreeMap<Double, Entity>(entities_by_distance);
+              for (Entity e : sorted_entities_by_distance.values()) {
                   if (e instanceof Planet) {
                     Planet planet = (Planet) e;
-                    if (planet.isOwned()) {
+                    /* Allows ships docked to owned planets to move to other locations */
+                    if (planet.isOwned() || planet.isFull()) {
+                      if (ship.getDockingStatus() == Ship.DockingStatus.Docked) {
+                        UndockMove m = new UndockMove(ship);
+                      }
                       continue;
                     }
                     if (ship.canDock(planet)) {
