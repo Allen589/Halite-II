@@ -5,7 +5,7 @@ public class MyBot {
 
     public static void main(final String[] args) {
         final Networking networking = new Networking();
-        final GameMap gameMap = networking.initialize("Tamagocchi");
+        final GameMap gameMap = networking.initialize("Boss");
 
         // We now have 1 full minute to analyse the initial map.
         final String initialMapIntelligence =
@@ -19,6 +19,23 @@ public class MyBot {
         for (;;) {
             moveList.clear();
             networking.updateMap(gameMap);
+            int counter = 0;
+            Map<Integer, Planet> planets = gameMap.getAllPlanets();
+            for (Planet p : planets.values()) {
+              if (p.isOwned()) {
+                counter++;
+              }
+            }
+            // If there are no more unowned planets, its time to fight!
+            if (counter == planets.size()) {
+              for (final Ship ship : gameMap.getMyPlayer().getShips().values()) {
+                UndockMove m = new UndockMove(ship);
+                moveList.add(m);
+                break;
+              }
+              Networking.sendMoves(moveList);
+              continue;
+            }
 
             for (final Ship ship : gameMap.getMyPlayer().getShips().values()) {
                 if (ship.getDockingStatus() != Ship.DockingStatus.Undocked) {
@@ -34,6 +51,8 @@ public class MyBot {
                     if (planet.isOwned() || planet.isFull()) {
                       if (ship.getDockingStatus() == Ship.DockingStatus.Docked) {
                         UndockMove m = new UndockMove(ship);
+                        moveList.add(m);
+                        break;
                       }
                       continue;
                     }
